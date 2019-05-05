@@ -1,0 +1,7 @@
+Credits/Thank You
+
+* don_bruce, for the original RFPR mod. This mod started as a refactor of RFPR
+  to clean up the code and add some functionality for a mod pack I'm working on,
+  but it spiraled out of control and turned into nearly a complete rewrite.
+
+* The Minecraft Forge Dev Team

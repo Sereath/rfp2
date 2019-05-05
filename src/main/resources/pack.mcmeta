@@ -1,0 +1,7 @@
+{
+    "pack": {
+        "description": "rfp2",
+        "pack_format": 3,
+        "_comment": "Provides full body rendering in first person view."
+    }
+}
