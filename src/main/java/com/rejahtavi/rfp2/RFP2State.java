@@ -33,6 +33,7 @@ public class RFP2State
     int  spawnDelay;
     long checkEnableModDelay;
     long checkEnableRealArmsDelay;
+    int  suspendApiDelay;
     
     // state flags
     boolean lastActivateCheckResult;
@@ -54,6 +55,7 @@ public class RFP2State
         // Initialize local variables
         checkEnableModDelay      = 0;
         checkEnableRealArmsDelay = 0;
+        suspendApiDelay          = 0;
         lastActivateCheckResult  = true;
         lastRealArmsCheckResult  = true;
         
@@ -106,7 +108,8 @@ public class RFP2State
     }
     
     // Receive event when player hands are about to be drawn
-    @SubscribeEvent
+    @SubscribeEvent(
+        priority = EventPriority.HIGHEST)
     public void onEvent(RenderHandEvent event)
     {
         // Get local player reference
@@ -129,6 +132,7 @@ public class RFP2State
             // Decrement timers
             if (checkEnableModDelay > 0) --checkEnableModDelay;
             if (checkEnableRealArmsDelay > 0) --checkEnableRealArmsDelay;
+            if (suspendApiDelay > 0) --suspendApiDelay;
             
             // Get player reference and null check it
             EntityPlayer player = Minecraft.getMinecraft().player;
@@ -250,11 +254,26 @@ public class RFP2State
         spawnDelay = RFP2.DUMMY_MIN_RESPAWN_INTERVAL;
     }
     
+    public void setSuspendTimer(int ticks)
+    {
+        // check if tick value is valid; invalid values will be ignored
+        if (ticks > 0 && ticks <= RFP2.MAX_SUSPEND_TIMER)
+        {
+            // Only allow increasing the timer externally
+            //  * This is so multiple mods can use the API concurrently, and RFP2 being suspended is the preferred state.
+            //  * Once all mods stop requesting suspension times, the timer will expire at the longest, last value requested.
+            if (ticks > suspendApiDelay) suspendApiDelay = ticks;
+        }
+    }
+    
     // Check if mod should be disabled for any reason
     public boolean isModEnabled(EntityPlayer player)
     {
         // No need to check anything if we are configured to be disabled
         if (!enableMod) return false;
+        
+        // Don't do anything if we've been suspended by another mod
+        if (suspendApiDelay > 0) return false;
         
         // No need to check anything else if player is dead or otherwise cannot be found
         if (player == null) return false;

@@ -19,7 +19,8 @@ import net.minecraft.util.ResourceLocation;
  * In other words: The original doRender() call is *indirectly* triggering a vanilla player render operation,
  * instead of rendering our dummy entity (which is invisible anyway).
  * 
- * Using the vanilla renderer means we will automatically inherit any changes *other* mods have made to the player character.
+ * Using the vanilla renderer means we will automatically inherit any changes *other* mods have made to the player character,
+ * but it also means that we have to deal with anything they add to the head that could block the view.
  */
 public class RenderPlayerDummy extends Render<EntityPlayerDummy>
 {
@@ -62,9 +63,10 @@ public class RenderPlayerDummy extends Render<EntityPlayerDummy>
         
         // Grab a backup of any items we might possibly touch, so that we can be *guaranteed*
         // to be able to restore them when it comes time for the finally{} block to run.
-        ItemStack itemMainHand   = player.inventory.getCurrentItem();
-        ItemStack itemOffHand    = player.inventory.offHandInventory.get(0);
-        ItemStack itemHelmetSlot = player.inventory.armorInventory.get(3);
+        ItemStack itemMainHand           = player.inventory.getCurrentItem();
+        ItemStack itemOffHand            = player.inventory.offHandInventory.get(0);
+        ItemStack itemHelmetSlot         = player.inventory.armorInventory.get(3);
+        boolean   isCosArmorHelmetHidden = true;
         
         // Make quick per-frame compatibility checks based on current configuration and player state
         
@@ -90,6 +92,12 @@ public class RenderPlayerDummy extends Render<EntityPlayerDummy>
                                  playerModel.bipedLeftArmwear.isHidden,
                                  playerModel.bipedRightArmwear.isHidden
         };
+        
+        // If Cosmetic Armor Reworked is loaded, grab a backup of the "hidden" state of the cosmetic helmet
+        if (RFP2.compatCosArmor != null)
+        {
+            isCosArmorHelmetHidden = RFP2.compatCosArmor.getHelmetHidden(player);
+        }
         
         /*
          * With the routine, unlikely-to-fail stuff out of the way, try to make the remainder
@@ -138,6 +146,12 @@ public class RenderPlayerDummy extends Render<EntityPlayerDummy>
             playerModel.bipedHead.isHidden     = true;
             playerModel.bipedHeadwear.isHidden = true;
             
+            // If Cosmetic Armor Reworked is loaded, force the helmet to be hidden for the moment
+            if (RFP2.compatCosArmor != null)
+            {
+                RFP2.compatCosArmor.setHelmetHidden(player, true);
+            }
+            
             // Check if we need to hide the arms
             if (!isRealArmsEnabled)
             {
@@ -152,6 +166,11 @@ public class RenderPlayerDummy extends Render<EntityPlayerDummy>
                 playerModel.bipedRightArm.isHidden     = true;
                 playerModel.bipedLeftArmwear.isHidden  = true;
                 playerModel.bipedRightArmwear.isHidden = true;
+                
+                if (RFP2.compatCosArmor != null)
+                {
+                    RFP2.compatCosArmor.getHelmetHidden(player);
+                }
             }
             
             /*
@@ -238,6 +257,12 @@ public class RenderPlayerDummy extends Render<EntityPlayerDummy>
             playerModel.bipedRightArm.isHidden     = modelState[3];
             playerModel.bipedLeftArmwear.isHidden  = modelState[4];
             playerModel.bipedRightArmwear.isHidden = modelState[5];
+            
+            // If Cosmetic Armor Reworked is loaded, restore the previous "hidden" state of the cosmetic helmet slot
+            if (RFP2.compatCosArmor != null)
+            {
+                RFP2.compatCosArmor.setHelmetHidden(player, isCosArmorHelmetHidden);
+            }
         }
     }
 }

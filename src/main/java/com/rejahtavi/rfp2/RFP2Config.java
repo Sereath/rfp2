@@ -85,7 +85,7 @@ public class RFP2Config
                                                  ".*compass$",
                                                  "tconstruct:.*bow",
                                                  "tconstruct:battlesign",
-                                                 "thermalfoundation:shield_.*" };
+                                                 "thermalfoundation:shield_.*"};
         
         @Comment({ "Mod temporarily disables when riding one of these mounts.",
                    "Stops legs clipping through minecarts.",
@@ -97,7 +97,7 @@ public class RFP2Config
         @Comment("Disables the mod when swimming.")
         @Name("Disable when swimming")
         public boolean disableWhenSwimming = false;
-
+        
         @Comment("Enforces a more aggressive version of the swimming checks.")
         @Name("Use aggressive swimming checks")
         public boolean useAggressiveSwimmingCheck = false;

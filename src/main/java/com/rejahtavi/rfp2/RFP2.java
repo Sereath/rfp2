@@ -3,11 +3,14 @@ package com.rejahtavi.rfp2;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Keyboard;
+import com.rejahtavi.rfp2.compat.RFP2CompatApi;
+import com.rejahtavi.rfp2.compat.RFP2CosArmor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -20,23 +23,31 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
     modid = RFP2.MODID,
     name = RFP2.MODNAME,
     version = RFP2.MODVER,
+    dependencies = RFP2.MODDEPS,
     clientSideOnly = true,
     acceptedMinecraftVersions = "1.12.2",
     acceptableRemoteVersions = "*")
 public class RFP2
 {
+    // Optional Dependencies
+    public static final String COS_ARMOR_MODID = "cosmeticarmorreworked";
+    public static final String MORPH_MODID     = "Morph";
+    
     // Mod info
     public static final String MODID   = "rfp2";
     public static final String MODNAME = "Real First Person 2";
     public static final String MODVER  = "@VERSION@";
+    public static final String MODDEPS = "after:" + COS_ARMOR_MODID + ";after:" + MORPH_MODID + ";";
     
     // Constants controlling dummy behavior
     public static final int DUMMY_MIN_RESPAWN_INTERVAL = 40;    // min ticks between spawn attempts
     public static final int DUMMY_UPDATE_TIMEOUT       = 20;    // max ticks between dummy entity updates
     public static final int DUMMY_MAX_SEPARATION       = 5;     // max blocks separation between dummy and player
     
-    // Constants controlling optimization / load limiting
+    // Constants controlling compatibility
+    public static final int MAX_SUSPEND_TIMER = 60;       // maximum number of ticks another mod may suspend RFP2 for
     
+    // Constants controlling optimization / load limiting
     // every 4 ticks is enough for global mod enable/disable checks
     public static final int MIN_ACTIVATION_CHECK_INTERVAL = 4;  // min ticks between mod enable checks
     
@@ -63,6 +74,10 @@ public class RFP2
     public static RFP2State  rfp2State;
     public static Logger     logger;
     
+    // Handles for optionally integrating with other mods
+    public static RFP2CompatApi api            = new RFP2CompatApi();
+    public static RFP2CosArmor  compatCosArmor = null;
+    
     // Sets the logging level for most messages written by the mod
     // Change to Level.WARN or Level.ERROR if higher visibility is desired in your launcher logs
     public static final Level DEFAULT_LOGGING_LEVEL = Level.DEBUG;
@@ -83,6 +98,11 @@ public class RFP2
     @EventHandler
     public void postInit(FMLPostInitializationEvent event)
     {
+        if (Loader.isModLoaded(COS_ARMOR_MODID))
+        {
+            RFP2.logger.log(Level.INFO, "loading with compatibility for " + COS_ARMOR_MODID);
+            compatCosArmor = new RFP2CosArmor();
+        }
         PROXY.postInit(event);
     }
     

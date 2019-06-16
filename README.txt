@@ -42,3 +42,23 @@ some improved functionality:
     * Everything is much more organized and clean.
     * Commented *everything*
     * More descriptive variable names
+
+
+BUILD INSTRUCTIONS (linux, windows will use gradlew.bat instead of ./gradlew)
+
+1. Clone into a local directory & cd into it
+    git clone https://github.com/rejahtavi/rfp2
+    cd rfp2
+
+2. Clean & set up the workspace
+    ./gradlew clean
+    ./gradlew setupDecompWorkspace
+
+3. create a 'libs' folder in that directory.
+
+4. populate the 'libs' folder by downloading the latest 12.2 versions of these:
+        CosmeticArmorReworked-1.12.2-(version).jar
+        Morph-1.12.2-(version).jar
+
+5. Build
+    ./gradlew build
