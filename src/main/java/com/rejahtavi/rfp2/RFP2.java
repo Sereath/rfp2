@@ -4,7 +4,8 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Keyboard;
 import com.rejahtavi.rfp2.compat.RFP2CompatApi;
-import com.rejahtavi.rfp2.compat.RFP2CosArmor;
+import com.rejahtavi.rfp2.compat.RFP2CosArmorHandler;
+import com.rejahtavi.rfp2.compat.RFP2MorphHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.ITextComponent;
@@ -31,13 +32,14 @@ public class RFP2
 {
     // Optional Dependencies
     public static final String COS_ARMOR_MODID = "cosmeticarmorreworked";
-    public static final String MORPH_MODID     = "Morph";
+    public static final String MORPH_MODID     = "morph";
+    public static final String OBFUSCATE_MODID = "obfuscate";
     
     // Mod info
     public static final String MODID   = "rfp2";
     public static final String MODNAME = "Real First Person 2";
     public static final String MODVER  = "@VERSION@";
-    public static final String MODDEPS = "after:" + COS_ARMOR_MODID + ";after:" + MORPH_MODID + ";";
+    public static final String MODDEPS = "after:" + COS_ARMOR_MODID + ";after:" + MORPH_MODID + ";after:" + OBFUSCATE_MODID + ";";
     
     // Constants controlling dummy behavior
     public static final int DUMMY_MIN_RESPAWN_INTERVAL = 40;    // min ticks between spawn attempts
@@ -75,8 +77,9 @@ public class RFP2
     public static Logger     logger;
     
     // Handles for optionally integrating with other mods
-    public static RFP2CompatApi api            = new RFP2CompatApi();
-    public static RFP2CosArmor  compatCosArmor = null;
+    public static RFP2CompatApi       api            = new RFP2CompatApi();
+    public static RFP2CosArmorHandler compatCosArmor = null;
+    public static RFP2MorphHandler    compatMorph    = null;
     
     // Sets the logging level for most messages written by the mod
     // Change to Level.WARN or Level.ERROR if higher visibility is desired in your launcher logs
@@ -101,7 +104,13 @@ public class RFP2
         if (Loader.isModLoaded(COS_ARMOR_MODID))
         {
             RFP2.logger.log(Level.INFO, "loading with compatibility for " + COS_ARMOR_MODID);
-            compatCosArmor = new RFP2CosArmor();
+            compatCosArmor = new RFP2CosArmorHandler();
+        }
+        
+        if (Loader.isModLoaded(MORPH_MODID))
+        {
+            RFP2.logger.log(Level.INFO,  "loading with compatibility for " + MORPH_MODID);
+            compatMorph = new RFP2MorphHandler();
         }
         PROXY.postInit(event);
     }
@@ -119,6 +128,18 @@ public class RFP2
         }
     }
     
+    // Provides facility to write a message to the local player's chat log
+    public static void logToChatByPlayer(String message, EntityPlayer player)
+    {
+        // get a reference to the player
+        if (player != null)
+        {
+            // compose text component from message string and send it to the player
+            ITextComponent textToSend = new TextComponentString(message);
+            player.sendMessage(textToSend);
+        }
+    }
+    
     public static void errorDisableMod(String sourceMethod, Exception e)
     {
         // If anything goes wrong, this method will be called to shut off the mod and write an error to the logs.
@@ -126,18 +147,27 @@ public class RFP2
         // This might just result in another error, but at least it will prevent us from
         // slowing down the game or flooding the logs if something is really broken.
         
-        // Temporarily disable the mod
-        RFP2.rfp2State.enableMod = false;
-        
-        // Write an error, including a stack trace, to the logs
-        RFP2.logger.log(Level.FATAL, ": first person rendering deactivated.");
-        RFP2.logger.log(Level.FATAL, ": " + sourceMethod + " encountered an exception:" + e.toString());
-        e.printStackTrace();
-        
-        // Announce the issue to the player in-game
-        RFP2.logToChat(RFP2.MODNAME + " mod " + TextFormatting.RED + " disabled");
-        RFP2.logToChat(sourceMethod + " encountered an exception:");
-        RFP2.logToChat(TextFormatting.RED + e.getMessage());
-        RFP2.logToChat(TextFormatting.GOLD + "Please check your minecraft log file for more details.");
+        if (RFP2Config.compatability.disableRenderErrorCatching)
+        {
+            // Write error to log but continue
+            RFP2.logger.log(Level.FATAL, ": " + sourceMethod + " **IGNORING** exception:" + e.getMessage());
+        }
+        else
+        {
+            // Temporarily disable the mod
+            RFP2.rfp2State.enableMod = false;
+            
+            // Write an error, including a stack trace, to the logs
+            RFP2.logger.log(Level.FATAL, ": first person rendering deactivated.");
+            RFP2.logger.log(Level.FATAL, ": " + sourceMethod + " encountered an exception:" + e.getMessage());
+            e.printStackTrace();
+            
+            // Announce the issue to the player in-game
+            RFP2.logToChat(RFP2.MODNAME + " mod " + TextFormatting.RED + " disabled");
+            RFP2.logToChat(sourceMethod + " encountered an exception:");
+            RFP2.logToChat(TextFormatting.RED + e.getMessage());
+            RFP2.logToChat(TextFormatting.DARK_RED + e.getStackTrace().toString());
+            RFP2.logToChat(TextFormatting.GOLD + "Please check your minecraft log file for more details.");
+        }
     }
 }

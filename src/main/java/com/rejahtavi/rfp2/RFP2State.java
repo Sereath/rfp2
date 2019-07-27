@@ -8,10 +8,12 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
@@ -42,6 +44,8 @@ public class RFP2State
     boolean enableRealArms;
     boolean enableHeadTurning;
     boolean enableStatusMessages;
+    boolean disabledForConflict = false;
+    boolean conflictCheckDone   = false;
     
     // Constructor
     public RFP2State()
@@ -75,6 +79,9 @@ public class RFP2State
         receiveCanceled = true)
     public void onEvent(KeyInputEvent event)
     {
+        // kill mod completely when a conflict is detected.
+        if (this.disabledForConflict) return;
+        
         // Check key binding in turn for new presses
         if (RFP2.keybindArmsToggle.checkForNewPress())
         {
@@ -107,11 +114,34 @@ public class RFP2State
         }
     }
     
+    @SubscribeEvent
+    public void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event)
+    {
+        if (Loader.isModLoaded(RFP2.OBFUSCATE_MODID))
+        {
+            RFP2.logToChatByPlayer(TextFormatting.RED + "ERROR: RFP2 is not compatible with "
+                                   + TextFormatting.GOLD
+                                   + "Obfuscate Mod"
+                                   + TextFormatting.RED
+                                   + ".",
+                                   event.player);
+            RFP2.logToChatByPlayer(TextFormatting.RED + "Both mods modify the first person view, causing a known conflict.", event.player);
+            RFP2.logToChatByPlayer(TextFormatting.RED + "RFP2 has been disabled.", event.player);
+            RFP2.logger.log(Level.FATAL, ": first person rendering deactivated.");
+            RFP2.logger.log(Level.FATAL, ": RFP2 is not compatible with Obfuscate Mod.");
+            RFP2.rfp2State.enableMod           = false;
+            RFP2.rfp2State.disabledForConflict = true;
+        }
+    }
+    
     // Receive event when player hands are about to be drawn
     @SubscribeEvent(
         priority = EventPriority.HIGHEST)
     public void onEvent(RenderHandEvent event)
     {
+        // kill mod completely when a conflict is detected.
+        if (this.disabledForConflict) return;
+        
         // Get local player reference
         EntityPlayer player = Minecraft.getMinecraft().player;
         // if: 1) player exists AND 2) mod is active AND 3) rendering real arms is active
@@ -126,6 +156,9 @@ public class RFP2State
     @SubscribeEvent
     public void onEvent(TickEvent.ClientTickEvent event)
     {
+        // kill mod completely when a conflict is detected.
+        if (this.disabledForConflict) return;
+        
         // Make this block as fail-safe as possible, since it runs every tick
         try
         {
@@ -215,6 +248,9 @@ public class RFP2State
     // Handles dummy spawning
     void attemptDummySpawn(EntityPlayer player)
     {
+        // kill mod completely when a conflict is detected.
+        if (this.disabledForConflict) return;
+        
         try
         {
             // Make sure any existing dummy is dead
@@ -250,12 +286,18 @@ public class RFP2State
         if (dummy != null) dummy.setDead();
         dummy = null;
         
+        // kill mod completely when a conflict is detected.
+        if (this.disabledForConflict) return;
+        
         // Set timer to spawn a new one
         spawnDelay = RFP2.DUMMY_MIN_RESPAWN_INTERVAL;
     }
     
     public void setSuspendTimer(int ticks)
     {
+        // kill mod completely when a conflict is detected.
+        if (this.disabledForConflict) return;
+        
         // check if tick value is valid; invalid values will be ignored
         if (ticks > 0 && ticks <= RFP2.MAX_SUSPEND_TIMER)
         {
@@ -269,6 +311,9 @@ public class RFP2State
     // Check if mod should be disabled for any reason
     public boolean isModEnabled(EntityPlayer player)
     {
+        // kill mod completely when a conflict is detected.
+        if (this.disabledForConflict) return false;
+        
         // No need to check anything if we are configured to be disabled
         if (!enableMod) return false;
         
@@ -335,6 +380,9 @@ public class RFP2State
     // Check if we should render real arms or not
     public boolean isRealArmsEnabled(EntityPlayer player)
     {
+        // kill mod completely when a conflict is detected.
+        if (this.disabledForConflict) return false;
+        
         // No need to check anything if we don't want this enabled
         if (!enableRealArms) return false;
         
@@ -391,6 +439,9 @@ public class RFP2State
     // Check if head rotation is enabled
     public boolean isHeadRotationEnabled(EntityPlayer player)
     {
+        // kill mod completely when a conflict is detected.
+        if (this.disabledForConflict) return false;
+        
         return enableHeadTurning;
     }
     

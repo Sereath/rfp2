@@ -109,6 +109,10 @@ public class RFP2Config
         @Comment("Switches to vanilla arms when *any* item is held, not just conflict items.")
         @Name("Use vanilla arms when holding any item")
         public boolean disableArmsWhenAnyItemHeld = false;
+        
+        @Comment("Disables rendering safety checks. May enable compatibility with mods that cause rendering exceptions, but cannot guarantee that the game will be stable.")
+        @Name("Ignore rendering errors (not recommended).")
+        public boolean disableRenderErrorCatching = false;
     }
     
     // Subscribe to configuration change event

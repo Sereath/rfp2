@@ -72,7 +72,7 @@ public class RenderPlayerDummy extends Render<EntityPlayerDummy>
         
         // Implement config option for disabling when sneaking
         if (RFP2Config.compatability.disableWhenSneaking && player.isSneaking()) return;
-        
+
         // Grab a reference to the vanilla player renderer, null check, and abort if it fails
         Render<AbstractClientPlayer> render         = (RenderPlayer) this.renderManager.<AbstractClientPlayer>getEntityRenderObject(player);
         RenderPlayer                 playerRenderer = (RenderPlayer) render;
@@ -151,6 +151,13 @@ public class RenderPlayerDummy extends Render<EntityPlayerDummy>
             {
                 RFP2.compatCosArmor.setHelmetHidden(player, true);
             }
+
+            // If morph is loaded, check if the player is in a morph state
+            if (RFP2.compatMorph != null)
+            {
+                // player is morphed so don't render anything in first person
+                if (RFP2.compatMorph.isPlayerMorphed(player)) return;
+            }            
             
             // Check if we need to hide the arms
             if (!isRealArmsEnabled)
