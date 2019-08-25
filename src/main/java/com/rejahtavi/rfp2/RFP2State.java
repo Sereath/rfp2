@@ -13,7 +13,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
@@ -114,24 +113,33 @@ public class RFP2State
         }
     }
     
-    @SubscribeEvent
-    public void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event)
+    // returns true when mod conflicts are detected
+    public boolean modConflictsDetected(EntityPlayer player)
     {
-        if (Loader.isModLoaded(RFP2.OBFUSCATE_MODID))
-        {
-            RFP2.logToChatByPlayer(TextFormatting.RED + "ERROR: RFP2 is not compatible with "
-                                   + TextFormatting.GOLD
-                                   + "Obfuscate Mod"
-                                   + TextFormatting.RED
-                                   + ".",
-                                   event.player);
-            RFP2.logToChatByPlayer(TextFormatting.RED + "Both mods modify the first person view, causing a known conflict.", event.player);
-            RFP2.logToChatByPlayer(TextFormatting.RED + "RFP2 has been disabled.", event.player);
-            RFP2.logger.log(Level.FATAL, ": first person rendering deactivated.");
-            RFP2.logger.log(Level.FATAL, ": RFP2 is not compatible with Obfuscate Mod.");
-            RFP2.rfp2State.enableMod           = false;
-            RFP2.rfp2State.disabledForConflict = true;
+        if (this.conflictCheckDone) {
+            return this.disabledForConflict;
+        } else {
+            
+            String modConflictList = "";
+            for (String conflictingID : RFP2.CONFLICT_MODIDS) {
+                if (Loader.isModLoaded(conflictingID))
+                {
+                    if (modConflictList.length() != 0) modConflictList += ", ";
+                    modConflictList += conflictingID;
+                }
+            }
+    
+            if (modConflictList.length() != 0) {
+                RFP2.logToChatByPlayer(TextFormatting.RED + "ERROR: RFP2 is not compatible with the following mod(s): "
+                        + TextFormatting.GOLD + modConflictList + TextFormatting.RED + ".", player);
+                RFP2.logToChatByPlayer(TextFormatting.RED + "RFP2 has been disabled.", player);
+                RFP2.logger.log(Level.FATAL, ": first person rendering deactivated due to mod conflict(s): " + modConflictList);
+                this.enableMod           = false;
+                this.disabledForConflict = true;
+            }
+            this.conflictCheckDone = true;
         }
+        return this.disabledForConflict;
     }
     
     // Receive event when player hands are about to be drawn
@@ -248,8 +256,11 @@ public class RFP2State
     // Handles dummy spawning
     void attemptDummySpawn(EntityPlayer player)
     {
-        // kill mod completely when a conflict is detected.
-        if (this.disabledForConflict) return;
+        // check for mod conflicts when we attempt to spawn a dummy
+        // (this is the easy way of telling when the world has fully loaded,
+        // the check will only occur once per game launch, then this function
+        // will always return true, preventing further attempts to spawn the dummy.
+        if (this.modConflictsDetected(player)) return;
         
         try
         {

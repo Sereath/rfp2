@@ -33,13 +33,15 @@ public class RFP2
     // Optional Dependencies
     public static final String COS_ARMOR_MODID = "cosmeticarmorreworked";
     public static final String MORPH_MODID     = "morph";
-    public static final String OBFUSCATE_MODID = "obfuscate";
+    
+    // Conflicting Mods
+    public static final String[] CONFLICT_MODIDS = {"obfuscate", "playerformlittlemaid"};
     
     // Mod info
     public static final String MODID   = "rfp2";
     public static final String MODNAME = "Real First Person 2";
     public static final String MODVER  = "@VERSION@";
-    public static final String MODDEPS = "after:" + COS_ARMOR_MODID + ";after:" + MORPH_MODID + ";after:" + OBFUSCATE_MODID + ";";
+    public static final String MODDEPS = "after:" + COS_ARMOR_MODID + ";after:" + MORPH_MODID + ";";
     
     // Constants controlling dummy behavior
     public static final int DUMMY_MIN_RESPAWN_INTERVAL = 40;    // min ticks between spawn attempts
@@ -47,11 +49,13 @@ public class RFP2
     public static final int DUMMY_MAX_SEPARATION       = 5;     // max blocks separation between dummy and player
     
     // Constants controlling compatibility
-    public static final int MAX_SUSPEND_TIMER = 60;       // maximum number of ticks another mod may suspend RFP2 for
+    public static final int MAX_SUSPEND_TIMER              = 60;  // maximum number of ticks another mod may suspend RFP2 for
+    public static final int MIN_IGNORED_ERROR_LOG_INTERVAL = 60;  // interval between logging events when errors are ignored.
     
     // Constants controlling optimization / load limiting
     // every 4 ticks is enough for global mod enable/disable checks
-    public static final int MIN_ACTIVATION_CHECK_INTERVAL = 4;  // min ticks between mod enable checks
+    public static final int  MIN_ACTIVATION_CHECK_INTERVAL = 4;  // min ticks between mod enable checks
+    public static final long MIN_TICKS_BETWEEN_ERROR_LOGS  = 1200; // only log errors once per minute (20tps * 60s/m)
     
     // arm checks need to be faster to keep up with hotbar scrolling, but we still want to limit it to once per tick.
     public static final int MIN_REAL_ARMS_CHECK_INTERVAL = 1;   // min ticks between arms enable checks
@@ -75,6 +79,8 @@ public class RFP2
     public static RFP2Config rfp2Config;
     public static RFP2State  rfp2State;
     public static Logger     logger;
+    public static long       lastLoggedTimestamp = 0;
+    public static long       ignoredErrorCount = 0;
     
     // Handles for optionally integrating with other mods
     public static RFP2CompatApi       api            = new RFP2CompatApi();
@@ -149,8 +155,24 @@ public class RFP2
         
         if (RFP2Config.compatability.disableRenderErrorCatching)
         {
-            // Write error to log but continue
-            RFP2.logger.log(Level.FATAL, ": " + sourceMethod + " **IGNORING** exception:" + e.getMessage());
+            // Get current epoch
+            long epoch = System.currentTimeMillis() / 1000L;
+            
+            // Check if it has been long enough since our last logging event
+            if (epoch >= (lastLoggedTimestamp + MIN_IGNORED_ERROR_LOG_INTERVAL)) {
+                // Write error to log but continue
+                RFP2.logger.log(Level.WARN, ": " + sourceMethod + " **IGNORING** exception:" + e.getMessage());
+                // Announce number of errors ignored since last report
+                if (ignoredErrorCount > 0) {
+                    RFP2.logger.log(Level.WARN, ": (" + ignoredErrorCount + " errors ignored in last " + MIN_IGNORED_ERROR_LOG_INTERVAL + "s.)" );
+                }
+                // reset counter and timer
+                ignoredErrorCount = 0;
+                lastLoggedTimestamp = epoch;
+            } else {
+                // hasn't been long enough, just increment the counter
+                ignoredErrorCount += 1;
+            }
         }
         else
         {
