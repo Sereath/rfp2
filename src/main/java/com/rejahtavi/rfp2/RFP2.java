@@ -35,7 +35,7 @@ public class RFP2
     public static final String MORPH_MODID     = "morph";
     
     // Conflicting Mods
-    public static final String[] CONFLICT_MODIDS = {"obfuscate", "playerformlittlemaid"};
+    public static final String[] CONFLICT_MODIDS = {"obfuscate", "ido", "moreplayermodels", "playerformlittlemaid"};
     
     // Mod info
     public static final String MODID   = "rfp2";
