@@ -38,13 +38,13 @@ some improved functionality:
         - should any of this code fail, the mod switches itself off to avoid lagging or crashing the game.
 
 -- Code Improvements
-    * Refactored mod to span several files and objects.
+    * Refactored mod's code to span several files and objects.
     * Everything is much more organized and clean.
     * Commented *everything*
     * More descriptive variable names
 
 
-BUILD INSTRUCTIONS (linux, windows will use gradlew.bat instead of ./gradlew)
+BUILD INSTRUCTIONS (For Linux -- windows will use gradlew.bat instead of ./gradlew)
 
 1. Clone into a local directory & cd into it
     git clone https://github.com/rejahtavi/rfp2
@@ -52,13 +52,16 @@ BUILD INSTRUCTIONS (linux, windows will use gradlew.bat instead of ./gradlew)
 
 2. Clean & set up the workspace
     ./gradlew clean
-    ./gradlew setupDecompWorkspace
+    ./gradlew setupDecompWorkspace --refresh-dependencies
 
-3. create a 'libs' folder in that directory.
+3. (Optional, if using eclipse) configure eclipse
+    ./gradlew eclipse
 
-4. populate the 'libs' folder by downloading the latest 12.2 versions of these:
+4. Create a 'libs' folder in the /rfp2/ directory.
+
+5. Populate the 'libs' folder by downloading the latest 12.2 versions of these:
         CosmeticArmorReworked-1.12.2-(version).jar
         Morph-1.12.2-(version).jar
 
-5. Build
+6. Build
     ./gradlew build

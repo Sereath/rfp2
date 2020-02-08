@@ -1,0 +1,29 @@
+*** HOW TO INTERFACE WITH RFP2 FROM YOUR MOD ***
+
+1. In your mod's @Mod() block, make sure your "dependencies" string includes "after:rfp2;"
+
+2. Create a Class to handle RFP2 compatibility.
+
+3. In your postInit() event handler block, check if the rfp2 "modid" is loaded, and if so, instantiate your compatibility class.
+
+4. Inside your compatibility class, use the following imports:
+    import com.rejahtavi.rfp2;
+    import com.rejahtavi.rfp2.compat.RFP2CompatApi;
+
+5. Then you can obtain a reference to the RFP2 api as follows:
+    RFP2CompatApi rfp2api = RFP2.api;
+    
+6. Each frame your mod renders something that could cover up the in-head rfp2 camera,
+   you can call functions on the rfp2api object to see if you should skip rendering them or not:
+   
+        rfp2IsHeadHidden():
+            Returns TRUE when third person headgear, or anything placed in front of the face, should NOT be rendered.   
+    
+        rfp2AreThirdPersonArmsHidden():
+            Returns TRUE when third person arms, or anything placed on the shoulders or in the hands, should NOT be rendered.
+            While this is TRUE, RFP2 is actually calling the first person hand renderer while the body is still visible.
+
+        rfp2AddSuspendTime(int ticks):
+            Allows you to request RFP2 to suspend itself and NOT modify the rendering process in any way for a set time.
+            The suspend timer maxes out at 60 ticks, so your mod will have to periodically refresh this to keep RFP2 switched off for longer than that.
+            (This is so that multiple mods can request suspend time without RFP2 having to track them all separately)
