@@ -8,13 +8,12 @@ import net.minecraft.entity.player.EntityPlayer;
 public class RFP2CompatHandlerCosarmor extends RFP2CompatHandler
 {
     // Mod Info
-    public static final String modId   = "cosmeticarmorreworked";
-    public static final String modName = "Cosmetic Armor Reworked";
+    public static final String modId = "cosmeticarmorreworked";
     
     // Constructor
     public RFP2CompatHandlerCosarmor()
     {
-        super(modId, modName);
+        super();
     }
     
     // Constants
@@ -23,8 +22,7 @@ public class RFP2CompatHandlerCosarmor extends RFP2CompatHandler
     // Local objects
     private boolean prevHeadHiddenState = false;
     
-
-    // Hide the player's cosarmor head items when called, making sure to cache whether they were hidden before we got here or not
+    // Hide the player's cosmetic armor head items when called, making sure to cache whether they were hidden before we got here or not
     @Override
     public void hideHead(EntityPlayer player, boolean hideHelmet)
     {
@@ -32,7 +30,7 @@ public class RFP2CompatHandlerCosarmor extends RFP2CompatHandler
         setCosArmorHeadHidden(player, true);
     }
     
-    // Restore player's cosarmor head items to previous state
+    // Restore player's cosmetic armor head items to previous state
     @Override
     public void restoreHead(EntityPlayer player, boolean hideHelmet)
     {

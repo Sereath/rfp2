@@ -1,22 +1,17 @@
 package com.rejahtavi.rfp2.compat.handlers;
+
 import net.minecraft.entity.player.EntityPlayer;
 
 //compatibility module base class / template
 public class RFP2CompatHandler
 {
-    // Mod Info
-    //@formatter:off
-    protected String targetModId;
-    protected String targetModName;
-    public    String getModId()   { return targetModId;   }    
-    public    String getModName() { return targetModName; }
-    //@formatter:on
+    // Mod Info Template
+    // public static final String modId = "";
     
     // Constructor
-    public RFP2CompatHandler(String id, String name)
+    public RFP2CompatHandler()
     {
-        targetModId = id;
-        targetModName = name;
+        return;
     }
     
     // Behavior Getter Templates

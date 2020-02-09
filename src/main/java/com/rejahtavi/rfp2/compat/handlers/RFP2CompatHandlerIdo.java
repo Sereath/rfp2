@@ -6,8 +6,7 @@ import net.minecraft.entity.player.EntityPlayer;
 public class RFP2CompatHandlerIdo extends RFP2CompatHandler
 {
     // Mod Info
-    public static final String modId   = "ido";
-    public static final String modName = "Ido";
+    public static final String modId = "ido";
     
     // Constants
     private static final float IDO_EYEHEIGHT_THRESHOLD = 0.5f;
@@ -15,7 +14,7 @@ public class RFP2CompatHandlerIdo extends RFP2CompatHandler
     // Constructor
     public RFP2CompatHandlerIdo()
     {
-        super(modId, modName);
+        super();
     }
     
     // Detect when Ido swimming or crawling is happening, and disable RFP2 accordingly.

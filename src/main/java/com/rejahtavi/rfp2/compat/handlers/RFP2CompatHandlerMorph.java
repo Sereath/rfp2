@@ -10,8 +10,7 @@ import net.minecraftforge.fml.relauncher.Side;
 public class RFP2CompatHandlerMorph extends RFP2CompatHandler
 {
     // Mod Info
-    public static final String modId   = "morph";
-    public static final String modName = "Morph";
+    public static final String modId = "morph";
     
     // Local Variables
     IApi morphApiHandle = null;
@@ -19,11 +18,10 @@ public class RFP2CompatHandlerMorph extends RFP2CompatHandler
     // Constructor
     public RFP2CompatHandlerMorph()
     {
-        // Call parent constructor
-        super(modId, modName);
+        super();
         
         // Check to see if Morph is loaded before attempting to access its API
-        if (Loader.isModLoaded(targetModId))
+        if (Loader.isModLoaded(modId))
         {
             // Obtain handle to Morph API
             morphApiHandle = MorphApi.getApiImpl();

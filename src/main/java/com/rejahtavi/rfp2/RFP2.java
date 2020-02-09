@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Keyboard;
 import com.rejahtavi.rfp2.compat.RFP2CompatApi;
 import com.rejahtavi.rfp2.compat.handlers.RFP2CompatHandler;
+import com.rejahtavi.rfp2.compat.handlers.RFP2CompatHandlerBaubles;
 import com.rejahtavi.rfp2.compat.handlers.RFP2CompatHandlerCosarmor;
 import com.rejahtavi.rfp2.compat.handlers.RFP2CompatHandlerMorph;
 import com.rejahtavi.rfp2.compat.handlers.RFP2CompatHandlerIdo;
@@ -121,7 +122,14 @@ public class RFP2
         // Initialize compatibility handlers
         compatHandlers = new ArrayList<RFP2CompatHandler>();
         
-        // Detect and load support for cosarmor
+        // Detect and load support for baubles
+        if (Loader.isModLoaded(RFP2CompatHandlerBaubles.modId))
+        {
+            compatHandlers.add(new RFP2CompatHandlerBaubles());
+            logMessage += RFP2CompatHandlerBaubles.modId + ", ";
+        }
+
+        // Detect and load support for cosmetic armor
         if (Loader.isModLoaded(RFP2CompatHandlerCosarmor.modId))
         {
             compatHandlers.add(new RFP2CompatHandlerCosarmor());
