@@ -260,7 +260,7 @@ public class RenderPlayerDummy extends Render<EntityPlayerDummy>
             playerModel.bipedLeftArmwear.isHidden  = modelState[4];
             playerModel.bipedRightArmwear.isHidden = modelState[5];
 
-            // Instruct compatibility handlers hide head models (handlers are responsible for caching state for later restoration) 
+            // Instruct compatibility handlers restore head models 
             for (RFP2CompatHandler handler : RFP2.compatHandlers)
             {
                 handler.restoreHead(player, true);
