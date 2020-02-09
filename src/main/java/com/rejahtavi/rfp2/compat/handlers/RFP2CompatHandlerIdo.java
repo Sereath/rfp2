@@ -5,26 +5,31 @@ import net.minecraft.entity.player.EntityPlayer;
 //compatibility module for Morph mod
 public class RFP2CompatHandlerIdo extends RFP2CompatHandler
 {
+    // Mod Info
     public static final String modId   = "ido";
     public static final String modName = "Ido";
+    
+    // Constants
     private static final float IDO_EYEHEIGHT_THRESHOLD = 0.5f;
     
+    // Constructor
     public RFP2CompatHandlerIdo()
     {
         super(modId, modName);
     }
     
+    // Detect when Ido swimming or crawling is happening, and disable RFP2 accordingly.
     @Override
     public boolean getDisableRFP2(EntityPlayer player)
     {
         if (player.eyeHeight < IDO_EYEHEIGHT_THRESHOLD)
         {
-            // Player is currently very short -- IDO crouching or swimming is active.
+            // Player is currently very short -- IDO crawling or swimming is active.
             return true;
         }
         else
         {
-            // Player is currently crouching or standing -- IDO crouching or swimming is NOT active.
+            // Player is currently crouching or standing -- IDO crawling or swimming is NOT active.
             return false;
         }
     }

@@ -71,7 +71,7 @@ public class RenderPlayerDummy extends Render<EntityPlayerDummy>
         // Make quick per-frame compatibility checks based on current configuration and player state
         
         // Implement config option for disabling when sneaking
-        if (RFP2Config.compatability.disableWhenSneaking && player.isSneaking()) return;
+        if (RFP2Config.compatibility.disableWhenSneaking && player.isSneaking()) return;
         
         // Grab a reference to the vanilla player renderer, null check, and abort if it fails
         Render<AbstractClientPlayer> render         = (RenderPlayer) this.renderManager.<AbstractClientPlayer>getEntityRenderObject(player);

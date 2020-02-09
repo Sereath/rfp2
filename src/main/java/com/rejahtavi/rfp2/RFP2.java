@@ -42,20 +42,13 @@ public class RFP2
     public static final String MODNAME = "Real First Person 2";
     public static final String MODVER  = "@VERSION@";
     
-    // Optional Dependencies
-    @SuppressWarnings("serial")
-    public static ArrayList<RFP2CompatHandler> compatHandlers = new ArrayList<RFP2CompatHandler>()
-    {
-        {
-            add(new RFP2CompatHandlerCosarmor());
-            add(new RFP2CompatHandlerMorph());
-            add(new RFP2CompatHandlerIdo());
-        }
-    };
+    // Provide list of mods to load after, so that that compatibility handlers can load correctly.
+    public static final String MODDEPS = (("after:" + RFP2CompatHandlerCosarmor.modId + ";")
+                                          + ("after:" + RFP2CompatHandlerIdo.modId + ";")
+                                          + ("after:" + RFP2CompatHandlerMorph.modId + ";"));
     
-    public static final String MODDEPS = ("after:" + RFP2CompatHandlerCosarmor.modId + ";")
-                                         + ("after:" + RFP2CompatHandlerMorph.modId + ";")
-                                         + ("after:" + RFP2CompatHandlerIdo.modId + ";");
+    // Collection of compatibility handler objects
+    public static ArrayList<RFP2CompatHandler> compatHandlers = new ArrayList<RFP2CompatHandler>();
     
     // Constants controlling dummy behavior
     public static final int DUMMY_MIN_RESPAWN_INTERVAL = 40; // min ticks between spawn attempts
@@ -126,32 +119,36 @@ public class RFP2
         String logMessage = "";
         
         // Initialize compatibility handlers
-        // Use iterator to loop over ArrayList
-        Iterator<RFP2CompatHandler> iter = compatHandlers.iterator();
-        while (iter.hasNext()) {
-
-            // Get the next handler in the list
-            RFP2CompatHandler handler = iter.next();
-
-            // Try to initialize it
-            handler.postInit();
-            
-            if (!handler.isLoaded()) {
-                // If it failed to load, remove it from the compatHandlers list
-                iter.remove();
-            } else {
-                // Otherwise, add it to the log message
-                logMessage += handler.getModId() + ", ";
-            }
+        compatHandlers = new ArrayList<RFP2CompatHandler>();
+        
+        // Detect and load support for cosarmor
+        if (Loader.isModLoaded(RFP2CompatHandlerCosarmor.modId))
+        {
+            compatHandlers.add(new RFP2CompatHandlerCosarmor());
+            logMessage += RFP2CompatHandlerCosarmor.modId + ", ";
         }
 
+        // Detect and load support for ido
+        if (Loader.isModLoaded(RFP2CompatHandlerIdo.modId))
+        {
+            compatHandlers.add(new RFP2CompatHandlerIdo());
+            logMessage += RFP2CompatHandlerIdo.modId + ", ";
+        }
+
+        // Detect and load support for morph
+        if (Loader.isModLoaded(RFP2CompatHandlerMorph.modId))
+        {
+            compatHandlers.add(new RFP2CompatHandlerMorph());
+            logMessage += RFP2CompatHandlerMorph.modId + ", ";
+        }
+        
         // If any compatibility handlers were loaded, log them.
         if (logMessage.length() > 0)
         {
-            logMessage = "Loading with compatibility for: " + (logMessage.substring(0, logMessage.length() - 2)) + ".";
-            RFP2.logger.log(LOGGING_LEVEL_LOW, logMessage);
-        }        
-        
+            logMessage = "Compatibility handler(s) loaded for: " + (logMessage.substring(0, logMessage.length() - 2)) + ".";
+            RFP2.logger.log(LOGGING_LEVEL_MED, logMessage);
+        }
+
         // Inform Forge we're done with our postInit() phase
         PROXY.postInit(event);
     }
@@ -188,7 +185,7 @@ public class RFP2
         // This might just result in another error, but at least it will prevent us from
         // slowing down the game or flooding the logs if something is really broken.
         
-        if (RFP2Config.compatability.disableRenderErrorCatching)
+        if (RFP2Config.compatibility.disableRenderErrorCatching)
         {
             // Get current epoch
             long epoch = System.currentTimeMillis() / 1000L;

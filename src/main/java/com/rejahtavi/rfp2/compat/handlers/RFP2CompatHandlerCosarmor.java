@@ -7,10 +7,9 @@ import net.minecraft.entity.player.EntityPlayer;
 // compatibility module for Cosmetic Armor Reworked
 public class RFP2CompatHandlerCosarmor extends RFP2CompatHandler
 {
+    // Mod Info
     public static final String modId   = "cosmeticarmorreworked";
     public static final String modName = "Cosmetic Armor Reworked";
-    
-    private static final int COSARMOR_HELMET_INDEX = 3;
     
     // Constructor
     public RFP2CompatHandlerCosarmor()
@@ -18,31 +17,33 @@ public class RFP2CompatHandlerCosarmor extends RFP2CompatHandler
         super(modId, modName);
     }
     
-    @Override
-    protected boolean isHeadHidden(EntityPlayer player)
-    {
-        return isCosArmorHeadHidden(player);
-    }
+    // Constants
+    private static final int COSARMOR_HELMET_INDEX = 3;
     
+    // Local objects
+    private boolean prevHeadHiddenState = false;
+    
+
+    // Hide the player's cosarmor head items when called, making sure to cache whether they were hidden before we got here or not
     @Override
     public void hideHead(EntityPlayer player, boolean hideHelmet)
     {
-        // By default, do nothing unless overridden.
-        // @Overrides should call isHeadHidden(), store the result into prevHeadHiddenState, then hide all head objects.
-        prevHeadHiddenState = isHeadHidden(player);
+        prevHeadHiddenState = isCosArmorHeadHidden(player);
         setCosArmorHeadHidden(player, true);
     }
     
+    // Restore player's cosarmor head items to previous state
     @Override
     public void restoreHead(EntityPlayer player, boolean hideHelmet)
     {
         // By default, do nothing unless overridden.
         // @Overrides should read prevHeadHiddenState restore all head object visibility to this previous state.
-        if (!prevHeadHiddenState) {
+        if (!prevHeadHiddenState)
+        {
             setCosArmorHeadHidden(player, false);
         }
     }
-
+    
     // Get current head hiding state from Cosmetic Armor Reworked
     private boolean isCosArmorHeadHidden(EntityPlayer player)
     {

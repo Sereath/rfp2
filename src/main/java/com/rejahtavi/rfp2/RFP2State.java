@@ -42,8 +42,8 @@ public class RFP2State
     boolean enableRealArms;
     boolean enableHeadTurning;
     boolean enableStatusMessages;
-    boolean disabledForConflict = false;
-    boolean conflictCheckDone   = false;
+    boolean conflictsDetected = false;
+    boolean conflictCheckDone = false;
     
     // Constructor
     public RFP2State()
@@ -77,8 +77,9 @@ public class RFP2State
         receiveCanceled = true)
     public void onEvent(KeyInputEvent event)
     {
+        // DISABLED for 1.3.1 -- now only warns players 
         // kill mod completely when a conflict is detected.
-        if (this.disabledForConflict) return;
+        // if (this.conflictsDetected) return;
         
         // Check key binding in turn for new presses
         if (RFP2.keybindArmsToggle.checkForNewPress())
@@ -113,15 +114,12 @@ public class RFP2State
     }
     
     // returns true when mod conflicts are detected
-    public boolean modConflictsDetected(EntityPlayer player)
+    public void detectModConflicts(EntityPlayer player)
     {
-        if (this.conflictCheckDone)
+        // Only let this routine run once per startup
+        if (!this.conflictCheckDone)
         {
-            return this.disabledForConflict;
-        }
-        else
-        {
-            
+            // Check for conflicting mods
             String modConflictList = "";
             for (String conflictingID : RFP2.CONFLICT_MODIDS)
             {
@@ -132,35 +130,40 @@ public class RFP2State
                 }
             }
             
+            // See if we got any hits
             if (modConflictList.length() != 0)
             {
-                if (RFP2Config.compatability.disableModCompatibilityChecks)
+                // If mod compatibility alerts are disabled, JUST put info in the log file.
+                if (RFP2Config.compatibility.disableModCompatibilityAlerts)
                 {
-                    RFP2.logger.log(RFP2.LOGGING_LEVEL_HIGH, this.getClass().getName() + ": Warning: compatibility checks have been bypassed in settings!");
+                    RFP2.logger.log(RFP2.LOGGING_LEVEL_HIGH, this.getClass().getName() + ": WARNING: In-game compatibility alerts have been disabled!");
                     // this.enableMod unchanged
                     // this.disabledForConflict unchanged
                 }
                 else
                 {
-                    RFP2.logToChatByPlayer(TextFormatting.RED + "ERROR: RFP2 is not compatible with the following mod(s): "
-                                           + TextFormatting.GOLD
-                                           + modConflictList
-                                           + TextFormatting.RED
-                                           + ".",
-                                           player);
-                    RFP2.logToChatByPlayer(TextFormatting.RED
-                                           + "RFP2 has been disabled. You can override this check in settings, but RFP2's camera views may break!",
-                                           player);
-                    this.enableMod           = false;
-                    this.disabledForConflict = true;
-                    RFP2.logger.log(RFP2.LOGGING_LEVEL_HIGH,
-                                    this.getClass().getName() + ": Error: mod compatibility checks failed. RFP2 has been be disabled.");
+                    // Mod compatibility alerts are enabled -- warn the player via in-game chat that something is amiss
+                    //@formatter:off
+                    RFP2.logToChatByPlayer("" + TextFormatting.BOLD + TextFormatting.GOLD
+                                           + "WARNING: RFP2 has known compatibility issues with the mod(s): "
+                                           + TextFormatting.RESET + TextFormatting.RED
+                                           + modConflictList + ".", player);
+
+                    RFP2.logToChatByPlayer("" + TextFormatting.BOLD + TextFormatting.GOLD
+                                           + "Be aware that visual glitches may occur.", player);
+                    
+                    RFP2.logToChatByPlayer("Press the hotkey (Default: Apostrophe) to use RFP2 anyway.", player);
+                                        
+                    RFP2.logToChatByPlayer("" + TextFormatting.RESET + TextFormatting.GRAY
+                                           + "(You can disable this warning in mod options.)", player);
+                    //@formatter:on                    
+                    this.conflictsDetected = true;
+                    this.enableMod         = false;
                 }
-                RFP2.logger.log(RFP2.LOGGING_LEVEL_HIGH, this.getClass().getName() + ": List of conflicting mod(s): " + modConflictList);
+                RFP2.logger.log(RFP2.LOGGING_LEVEL_HIGH, this.getClass().getName() + ": WARNING: Detected conflicting mod(s): " + modConflictList);
             }
             this.conflictCheckDone = true;
         }
-        return this.disabledForConflict;
     }
     
     // Receive event when player hands are about to be drawn
@@ -168,8 +171,9 @@ public class RFP2State
         priority = EventPriority.HIGHEST)
     public void onEvent(RenderHandEvent event)
     {
+        // DISABLED for 1.3.1 -- now only warns players 
         // kill mod completely when a conflict is detected.
-        if (this.disabledForConflict) return;
+        // if (this.conflictsDetected) return;
         
         // Get local player reference
         EntityPlayer player = Minecraft.getMinecraft().player;
@@ -185,8 +189,9 @@ public class RFP2State
     @SubscribeEvent
     public void onEvent(TickEvent.ClientTickEvent event)
     {
+        // DISABLED for 1.3.1 -- now only warns players 
         // kill mod completely when a conflict is detected.
-        if (this.disabledForConflict) return;
+        // if (this.conflictsDetected) return;
         
         // Make this block as fail-safe as possible, since it runs every tick
         try
@@ -277,11 +282,8 @@ public class RFP2State
     // Handles dummy spawning
     void attemptDummySpawn(EntityPlayer player)
     {
-        // check for mod conflicts when we attempt to spawn a dummy
-        // (this is the easy way of telling when the world has fully loaded,
-        // the check will only occur once per game launch, then this function
-        // will always return true, preventing further attempts to spawn the dummy.
-        if (this.modConflictsDetected(player)) return;
+        // Only runs once per startup. Running it here at dummy spawn is the easiest way to ensure it only happens after everything is fully loaded.
+        detectModConflicts(player);
         
         try
         {
@@ -318,8 +320,9 @@ public class RFP2State
         if (dummy != null) dummy.setDead();
         dummy = null;
         
+        // DISABLED for 1.3.1 -- now only warns players 
         // kill mod completely when a conflict is detected.
-        if (this.disabledForConflict) return;
+        // if (this.conflictsDetected) return;
         
         // Set timer to spawn a new one
         spawnDelay = RFP2.DUMMY_MIN_RESPAWN_INTERVAL;
@@ -327,8 +330,9 @@ public class RFP2State
     
     public void setSuspendTimer(int ticks)
     {
+        // DISABLED for 1.3.1 -- now only warns players 
         // kill mod completely when a conflict is detected.
-        if (this.disabledForConflict) return;
+        // if (this.conflictsDetected) return;
         
         // check if tick value is valid; invalid values will be ignored
         if (ticks > 0 && ticks <= RFP2.MAX_SUSPEND_TIMER)
@@ -343,8 +347,9 @@ public class RFP2State
     // Check if mod should be disabled for any reason
     public boolean isModEnabled(EntityPlayer player)
     {
+        // DISABLED for 1.3.1 -- now only warns players 
         // kill mod completely when a conflict is detected.
-        if (this.disabledForConflict) return false;
+        // if (this.conflictsDetected) return;
         
         // No need to check anything if we are configured to be disabled
         if (!enableMod) return false;
@@ -373,7 +378,7 @@ public class RFP2State
             checkEnableModDelay = RFP2.MIN_ACTIVATION_CHECK_INTERVAL;
             
             // Implement swimming check functionality
-            if (RFP2Config.compatability.disableWhenSwimming && dummy.isSwimming())
+            if (RFP2Config.compatibility.disableWhenSwimming && dummy.isSwimming())
             {
                 // we are swimming and are configured to disable when this is true, so we are disabled
                 lastActivateCheckResult = false;
@@ -392,7 +397,7 @@ public class RFP2State
                 else
                 {
                     // Player is riding something, find out what it is and if it's on our conflict list
-                    if (stringMatchesRegexList(playerMountEntity.getName().toLowerCase(), RFP2Config.compatability.mountConflictList))
+                    if (stringMatchesRegexList(playerMountEntity.getName().toLowerCase(), RFP2Config.compatibility.mountConflictList))
                     {
                         // player is riding a conflicting entity, so we are disabled.
                         lastActivateCheckResult = false;
@@ -412,8 +417,9 @@ public class RFP2State
     // Check if we should render real arms or not
     public boolean isRealArmsEnabled(EntityPlayer player)
     {
+        // DISABLED for 1.3.1 -- now only warns players 
         // kill mod completely when a conflict is detected.
-        if (this.disabledForConflict) return false;
+        // if (this.conflictsDetected) return;
         
         // No need to check anything if we don't want this enabled
         if (!enableRealArms) return false;
@@ -434,7 +440,7 @@ public class RFP2State
             String itemOffHand  = player.inventory.offHandInventory.get(0).getItem().getRegistryName().toString().toLowerCase();
             
             // Modify the check logic based on whether the "any item" flag is set or not
-            if (RFP2Config.compatability.disableArmsWhenAnyItemHeld)
+            if (RFP2Config.compatibility.disableArmsWhenAnyItemHeld)
             {
                 // "any item held" behavior is enabled; check if player's hands are empty
                 if (itemMainHand.equals("minecraft:air") && itemOffHand.equals("minecraft:air"))
@@ -452,8 +458,8 @@ public class RFP2State
             {
                 // The "any item" option is not in use, so we need to check the registry names of any
                 // held items against the conflict list
-                if (stringMatchesRegexList(itemMainHand, RFP2Config.compatability.heldItemConflictList)
-                    || (stringMatchesRegexList(itemOffHand, RFP2Config.compatability.heldItemConflictList)))
+                if (stringMatchesRegexList(itemMainHand, RFP2Config.compatibility.heldItemConflictList)
+                    || (stringMatchesRegexList(itemOffHand, RFP2Config.compatibility.heldItemConflictList)))
                 {
                     // player is holding a conflicting item in main or off hand; disable arm rendering
                     lastRealArmsCheckResult = false;
@@ -471,8 +477,9 @@ public class RFP2State
     // Check if head rotation is enabled
     public boolean isHeadRotationEnabled(EntityPlayer player)
     {
+        // DISABLED for 1.3.1 -- now only warns players 
         // kill mod completely when a conflict is detected.
-        if (this.disabledForConflict) return false;
+        // if (this.conflictsDetected) return;
         
         return enableHeadTurning;
     }
@@ -497,7 +504,7 @@ public class RFP2State
             {
                 // Something is wrong with the regex, switch off the mod and notify the user
                 enableMod = false;
-                RFP2.logToChat(RFP2.MODNAME + " " + TextFormatting.RED + "Error: [ " + i + " ] is not a valid regex, please edit your configuration.");
+                RFP2.logToChat(RFP2.MODNAME + " " + TextFormatting.RED + "Warning: [ " + i + " ] is not a valid regex, please edit your configuration.");
                 RFP2.logToChat(RFP2.MODNAME + " mod " + TextFormatting.RED + " disabled");
                 return false;
             }

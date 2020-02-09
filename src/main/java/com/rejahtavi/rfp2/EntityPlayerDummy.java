@@ -69,7 +69,7 @@ public class EntityPlayerDummy extends Entity
             if (swimming)
             {
                 // Currently swimming. Figure out if we should stop.
-                if (RFP2Config.compatability.useAggressiveSwimmingCheck)
+                if (RFP2Config.compatibility.useAggressiveSwimmingCheck)
                 {
                     // use aggressive version of swimming checks
                     // requires player to FULLY clear water to stop swimming
@@ -85,7 +85,7 @@ public class EntityPlayerDummy extends Entity
             else
             {
                 // Currently NOT swimming. Figure out if we should start.
-                if (RFP2Config.compatability.useAggressiveSwimmingCheck)
+                if (RFP2Config.compatibility.useAggressiveSwimmingCheck)
                 {
                     // use aggressive version of swimming checks
                     // only requires player to touch water to start swimming

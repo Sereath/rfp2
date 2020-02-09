@@ -41,7 +41,7 @@ public class RFP2Config
     // Create compatibility section
     @Comment("Item and Mount compatability lists for " + RFP2.MODNAME)
     @Name("Compatability")
-    public static final Compatability compatability = new Compatability();
+    public static final Compatibility compatibility = new Compatibility();
     
     // Define structure and defaults of Preferences section
     public static class Preferences
@@ -71,7 +71,7 @@ public class RFP2Config
     }
     
     // Define structure and defaults of Compatibility section
-    public static class Compatability
+    public static class Compatibility
     {
         @Comment({ "Vanilla arms are used when holding one of these items.",
                    "Needed for compasses and maps, stops big items blocking the view.",
@@ -82,6 +82,7 @@ public class RFP2Config
                                                  "minecraft:clock",
                                                  "minecraft:shield",
                                                  "minecraft:bow",
+                                                 "slashblade:.*",
                                                  ".*compass$",
                                                  "tconstruct:.*bow",
                                                  "tconstruct:battlesign",
@@ -114,9 +115,9 @@ public class RFP2Config
         @Name("Ignore rendering errors (not recommended).")
         public boolean disableRenderErrorCatching = false;
         
-        @Comment("Disables mod compatibility checks. Allows RFP2 to run even when mods that are known to block the RFP2 first person view are loaded.")
-        @Name("Ignore mod compatibility checks (not recommended).")
-        public boolean disableModCompatibilityChecks = false;
+        @Comment("Suppresses alerts about incompatible mods in chat on startup.")
+        @Name("Suppress startup compatibility alert (not recommended).")
+        public boolean disableModCompatibilityAlerts = false;
     }
     
     // Subscribe to configuration change event
@@ -131,8 +132,8 @@ public class RFP2Config
             RFP2.logger.log(RFP2.LOGGING_LEVEL_LOW, "synchronizing config file.");
             
             // Make sure all referenced items are lower case (makes matching later computationally cheaper)
-            RFP2Config.compatability.heldItemConflictList = lowerCaseArray(RFP2Config.compatability.heldItemConflictList);
-            RFP2Config.compatability.mountConflictList    = lowerCaseArray(RFP2Config.compatability.mountConflictList);
+            RFP2Config.compatibility.heldItemConflictList = lowerCaseArray(RFP2Config.compatibility.heldItemConflictList);
+            RFP2Config.compatibility.mountConflictList    = lowerCaseArray(RFP2Config.compatibility.mountConflictList);
             
             // Save the config
             ConfigManager.sync(RFP2.MODID, Config.Type.INSTANCE);
