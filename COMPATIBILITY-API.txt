@@ -14,7 +14,9 @@
     RFP2CompatApi rfp2api = RFP2.api;
     
 6. Each frame your mod renders something that could cover up the in-head rfp2 camera,
-   you can call functions on the rfp2api object to see if you should skip rendering them or not:
+   you can check if the api object is null, and if not, then call functions to change
+   your mod's rendering behavior based on what RFP2 is doing, or request RFP2 to
+   suspend itself for a bit.
    
         rfp2IsHeadHidden():
             Returns TRUE when third person headgear, or anything placed in front of the face, should NOT be rendered.   

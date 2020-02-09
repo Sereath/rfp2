@@ -85,7 +85,7 @@ public class RFP2Config
                                                  ".*compass$",
                                                  "tconstruct:.*bow",
                                                  "tconstruct:battlesign",
-                                                 "thermalfoundation:shield_.*"};
+                                                 "thermalfoundation:shield_.*" };
         
         @Comment({ "Mod temporarily disables when riding one of these mounts.",
                    "Stops legs clipping through minecarts.",
@@ -113,6 +113,10 @@ public class RFP2Config
         @Comment("Disables rendering safety checks. May enable compatibility with mods that cause rendering exceptions, but cannot guarantee that the game will be stable.")
         @Name("Ignore rendering errors (not recommended).")
         public boolean disableRenderErrorCatching = false;
+        
+        @Comment("Disables mod compatibility checks. Allows RFP2 to run even when mods that are known to block the RFP2 first person view are loaded.")
+        @Name("Ignore mod compatibility checks (not recommended).")
+        public boolean disableModCompatibilityChecks = false;
     }
     
     // Subscribe to configuration change event
@@ -124,7 +128,7 @@ public class RFP2Config
         if (event.getModID().contentEquals(RFP2.MODID))
         {
             // Inject the new values and save to the config file when the config has been changed from the GUI.
-            RFP2.logger.log(RFP2.DEFAULT_LOGGING_LEVEL, "synchronizing config file.");
+            RFP2.logger.log(RFP2.LOGGING_LEVEL_LOW, "synchronizing config file.");
             
             // Make sure all referenced items are lower case (makes matching later computationally cheaper)
             RFP2Config.compatability.heldItemConflictList = lowerCaseArray(RFP2Config.compatability.heldItemConflictList);
@@ -134,10 +138,10 @@ public class RFP2Config
             ConfigManager.sync(RFP2.MODID, Config.Type.INSTANCE);
             
             // Update current state to match preferences that were just selected in the GUI
-            RFP2.rfp2State.enableMod            = preferences.enableMod;
-            RFP2.rfp2State.enableRealArms       = preferences.enableRealArms;
-            RFP2.rfp2State.enableHeadTurning    = preferences.enableHeadTurning;
-            RFP2.rfp2State.enableStatusMessages = preferences.enableStatusMessages;
+            RFP2.state.enableMod            = preferences.enableMod;
+            RFP2.state.enableRealArms       = preferences.enableRealArms;
+            RFP2.state.enableHeadTurning    = preferences.enableHeadTurning;
+            RFP2.state.enableStatusMessages = preferences.enableStatusMessages;
         }
     }
     

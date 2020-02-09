@@ -1,5 +1,6 @@
 package com.rejahtavi.rfp2;
 
+import com.rejahtavi.rfp2.compat.handlers.RFP2CompatHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -61,18 +62,17 @@ public class RenderPlayerDummy extends Render<EntityPlayerDummy>
         EntityPlayerSP player = Minecraft.getMinecraft().player;
         if (player == null) return;
         
-        // Grab a backup of any items we might possibly touch, so that we can be *guaranteed*
+        // Grab a backup of any items we might possibly touch, so that we can be guaranteed
         // to be able to restore them when it comes time for the finally{} block to run.
         ItemStack itemMainHand           = player.inventory.getCurrentItem();
         ItemStack itemOffHand            = player.inventory.offHandInventory.get(0);
         ItemStack itemHelmetSlot         = player.inventory.armorInventory.get(3);
-        boolean   isCosArmorHelmetHidden = true;
         
         // Make quick per-frame compatibility checks based on current configuration and player state
         
         // Implement config option for disabling when sneaking
         if (RFP2Config.compatability.disableWhenSneaking && player.isSneaking()) return;
-
+        
         // Grab a reference to the vanilla player renderer, null check, and abort if it fails
         Render<AbstractClientPlayer> render         = (RenderPlayer) this.renderManager.<AbstractClientPlayer>getEntityRenderObject(player);
         RenderPlayer                 playerRenderer = (RenderPlayer) render;
@@ -93,12 +93,6 @@ public class RenderPlayerDummy extends Render<EntityPlayerDummy>
                                  playerModel.bipedRightArmwear.isHidden
         };
         
-        // If Cosmetic Armor Reworked is loaded, grab a backup of the "hidden" state of the cosmetic helmet
-        if (RFP2.compatCosArmor != null)
-        {
-            isCosArmorHelmetHidden = RFP2.compatCosArmor.getHelmetHidden(player);
-        }
-        
         /*
          * With the routine, unlikely-to-fail stuff out of the way, try to make the remainder
          * of this routine as fail-safe as possible. It runs every frame, so we want to be able
@@ -116,7 +110,13 @@ public class RenderPlayerDummy extends Render<EntityPlayerDummy>
             
             // (Keep this NO-OP check last, it can be more expensive than the others, due to the mount check.)
             // If mod is not enabled this frame, do nothing
-            if (!RFP2.rfp2State.isModEnabled(player)) return;
+            if (!RFP2.state.isModEnabled(player)) return;
+
+            // Check if any of the compatibility handlers want us to skip this frame 
+            for (RFP2CompatHandler handler : RFP2.compatHandlers)
+            {
+                if (handler.getDisableRFP2(player)) { return; }
+            }
             
             /*
              * Initialization: Pull in state info and set up local variables, now that we
@@ -131,8 +131,8 @@ public class RenderPlayerDummy extends Render<EntityPlayerDummy>
             
             // Get local copies of config & state
             float   playerModelOffset     = (float) RFP2Config.preferences.playerModelOffset;
-            boolean isRealArmsEnabled     = RFP2.rfp2State.isRealArmsEnabled(player);
-            boolean isHeadRotationEnabled = RFP2.rfp2State.isHeadRotationEnabled(player);
+            boolean isRealArmsEnabled     = RFP2.state.isRealArmsEnabled(player);
+            boolean isHeadRotationEnabled = RFP2.state.isHeadRotationEnabled(player);
             
             /*
              * Adjust Player Model:
@@ -145,19 +145,12 @@ public class RenderPlayerDummy extends Render<EntityPlayerDummy>
             // Hide the player model's head layers, again so they do not obstruct the camera.
             playerModel.bipedHead.isHidden     = true;
             playerModel.bipedHeadwear.isHidden = true;
-            
-            // If Cosmetic Armor Reworked is loaded, force the helmet to be hidden for the moment
-            if (RFP2.compatCosArmor != null)
-            {
-                RFP2.compatCosArmor.setHelmetHidden(player, true);
-            }
 
-            // If morph is loaded, check if the player is in a morph state
-            if (RFP2.compatMorph != null)
+            // Instruct compatibility handlers hide head models (handlers are responsible for caching state for later restoration) 
+            for (RFP2CompatHandler handler : RFP2.compatHandlers)
             {
-                // player is morphed so don't render anything in first person
-                if (RFP2.compatMorph.isPlayerMorphed(player)) return;
-            }            
+                handler.hideHead(player, true);
+            }
             
             // Check if we need to hide the arms
             if (!isRealArmsEnabled)
@@ -173,10 +166,11 @@ public class RenderPlayerDummy extends Render<EntityPlayerDummy>
                 playerModel.bipedRightArm.isHidden     = true;
                 playerModel.bipedLeftArmwear.isHidden  = true;
                 playerModel.bipedRightArmwear.isHidden = true;
-                
-                if (RFP2.compatCosArmor != null)
+
+                // Instruct compatibility handlers hide arm models (handlers are responsible for caching state for later restoration) 
+                for (RFP2CompatHandler handler : RFP2.compatHandlers)
                 {
-                    RFP2.compatCosArmor.getHelmetHidden(player);
+                    handler.hideArms(player, true);
                 }
             }
             
@@ -228,7 +222,8 @@ public class RenderPlayerDummy extends Render<EntityPlayerDummy>
              * Note that we do NOT pass the playerModel here -- the vanilla renderer already
              * has it! That's why we had to actually remove the player's helmet and possibly
              * other inventory items. That also means that it is *critical* that we undo all
-             * of those changes immediately after this.
+             * of those changes immediately after this, before anything outside of RFP2 can
+             * interact with these objects and invalidate our cached state.
              * 
              * (That is also why those reversions are implemented within a finally block.)
              */
@@ -264,11 +259,12 @@ public class RenderPlayerDummy extends Render<EntityPlayerDummy>
             playerModel.bipedRightArm.isHidden     = modelState[3];
             playerModel.bipedLeftArmwear.isHidden  = modelState[4];
             playerModel.bipedRightArmwear.isHidden = modelState[5];
-            
-            // If Cosmetic Armor Reworked is loaded, restore the previous "hidden" state of the cosmetic helmet slot
-            if (RFP2.compatCosArmor != null)
+
+            // Instruct compatibility handlers hide head models (handlers are responsible for caching state for later restoration) 
+            for (RFP2CompatHandler handler : RFP2.compatHandlers)
             {
-                RFP2.compatCosArmor.setHelmetHidden(player, isCosArmorHelmetHidden);
+                handler.restoreHead(player, true);
+                handler.restoreArms(player, true);
             }
         }
     }

@@ -1,7 +1,6 @@
 package com.rejahtavi.rfp2;
 
 import java.util.regex.PatternSyntaxException;
-import org.apache.logging.log4j.Level;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -116,26 +115,48 @@ public class RFP2State
     // returns true when mod conflicts are detected
     public boolean modConflictsDetected(EntityPlayer player)
     {
-        if (this.conflictCheckDone) {
+        if (this.conflictCheckDone)
+        {
             return this.disabledForConflict;
-        } else {
+        }
+        else
+        {
             
             String modConflictList = "";
-            for (String conflictingID : RFP2.CONFLICT_MODIDS) {
+            for (String conflictingID : RFP2.CONFLICT_MODIDS)
+            {
                 if (Loader.isModLoaded(conflictingID))
                 {
                     if (modConflictList.length() != 0) modConflictList += ", ";
                     modConflictList += conflictingID;
                 }
             }
-    
-            if (modConflictList.length() != 0) {
-                RFP2.logToChatByPlayer(TextFormatting.RED + "ERROR: RFP2 is not compatible with the following mod(s): "
-                        + TextFormatting.GOLD + modConflictList + TextFormatting.RED + ".", player);
-                RFP2.logToChatByPlayer(TextFormatting.RED + "RFP2 has been disabled.", player);
-                RFP2.logger.log(Level.FATAL, ": first person rendering deactivated due to mod conflict(s): " + modConflictList);
-                this.enableMod           = false;
-                this.disabledForConflict = true;
+            
+            if (modConflictList.length() != 0)
+            {
+                if (RFP2Config.compatability.disableModCompatibilityChecks)
+                {
+                    RFP2.logger.log(RFP2.LOGGING_LEVEL_HIGH, this.getClass().getName() + ": Warning: compatibility checks have been bypassed in settings!");
+                    // this.enableMod unchanged
+                    // this.disabledForConflict unchanged
+                }
+                else
+                {
+                    RFP2.logToChatByPlayer(TextFormatting.RED + "ERROR: RFP2 is not compatible with the following mod(s): "
+                                           + TextFormatting.GOLD
+                                           + modConflictList
+                                           + TextFormatting.RED
+                                           + ".",
+                                           player);
+                    RFP2.logToChatByPlayer(TextFormatting.RED
+                                           + "RFP2 has been disabled. You can override this check in settings, but RFP2's camera views may break!",
+                                           player);
+                    this.enableMod           = false;
+                    this.disabledForConflict = true;
+                    RFP2.logger.log(RFP2.LOGGING_LEVEL_HIGH,
+                                    this.getClass().getName() + ": Error: mod compatibility checks failed. RFP2 has been be disabled.");
+                }
+                RFP2.logger.log(RFP2.LOGGING_LEVEL_HIGH, this.getClass().getName() + ": List of conflicting mod(s): " + modConflictList);
             }
             this.conflictCheckDone = true;
         }
@@ -153,7 +174,7 @@ public class RFP2State
         // Get local player reference
         EntityPlayer player = Minecraft.getMinecraft().player;
         // if: 1) player exists AND 2) mod is active AND 3) rendering real arms is active
-        if (player != null && RFP2.rfp2State.isModEnabled(player) && RFP2.rfp2State.isRealArmsEnabled(player))
+        if (player != null && RFP2.state.isModEnabled(player) && RFP2.state.isRealArmsEnabled(player))
         {
             // then skip drawing the vanilla 2D HUD arms by canceling the event
             event.setCanceled(true);
@@ -217,7 +238,7 @@ public class RFP2State
                     if (dummy.world.provider.getDimension() != player.world.provider.getDimension())
                     {
                         needsReset = true;
-                        RFP2.logger.log(RFP2.DEFAULT_LOGGING_LEVEL,
+                        RFP2.logger.log(RFP2.LOGGING_LEVEL_DEBUG,
                                         this.getClass().getName() + ": Respawning dummy because player changed dimension.");
                     }
                     
@@ -225,7 +246,7 @@ public class RFP2State
                     if (dummy.getDistanceSq(player) > RFP2.DUMMY_MAX_SEPARATION)
                     {
                         needsReset = true;
-                        RFP2.logger.log(RFP2.DEFAULT_LOGGING_LEVEL,
+                        RFP2.logger.log(RFP2.LOGGING_LEVEL_DEBUG,
                                         this.getClass().getName() + ": Respawning dummy because player and dummy became separated.");
                     }
                     
@@ -233,7 +254,7 @@ public class RFP2State
                     if (dummy.lastTickUpdated < player.world.getTotalWorldTime() - RFP2.DUMMY_UPDATE_TIMEOUT)
                     {
                         needsReset = true;
-                        RFP2.logger.log(RFP2.DEFAULT_LOGGING_LEVEL,
+                        RFP2.logger.log(RFP2.LOGGING_LEVEL_DEBUG,
                                         this.getClass().getName() + ": Respawning dummy because state became stale. (Is the server lagging?)");
                     }
                     
@@ -284,7 +305,7 @@ public class RFP2State
              * Should anything unexpected occur in the spawning, there is a good chance that it will
              * work itself out within a respawn delay or two.
              */
-            RFP2.logger.log(Level.ERROR, this.getClass().getName() + ": failed to spawn PlayerDummy! Will retry. Exception:", e.toString());
+            RFP2.logger.log(RFP2.LOGGING_LEVEL_MED, this.getClass().getName() + ": failed to spawn PlayerDummy! Will retry. Exception:", e.toString());
             e.printStackTrace();
             resetDummy();
         }

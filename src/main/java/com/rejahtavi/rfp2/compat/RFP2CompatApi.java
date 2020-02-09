@@ -20,7 +20,7 @@ public class RFP2CompatApi
     {
         EntityPlayerSP player = Minecraft.getMinecraft().player;
         if (player == null) return false;
-        return RFP2.rfp2State.isModEnabled(player);
+        return RFP2.state.isModEnabled(player);
     }
     
     // During frames that this returns TRUE:
@@ -34,7 +34,7 @@ public class RFP2CompatApi
     {
         EntityPlayerSP player = Minecraft.getMinecraft().player;
         if (player == null) return false;
-        return !RFP2.rfp2State.isRealArmsEnabled(player);
+        return !RFP2.state.isRealArmsEnabled(player);
     }
     
     // If you are making a mod that for some reason needs to temporarily suspend RFP2, you can use the following call to do so.
@@ -45,6 +45,6 @@ public class RFP2CompatApi
     // stopped making requests will RFP2 allow itself to start back up again.
     public void rfp2AddSuspendTime(int ticks)
     {
-        RFP2.rfp2State.setSuspendTimer(ticks);
+        RFP2.state.setSuspendTimer(ticks);
     }
 }

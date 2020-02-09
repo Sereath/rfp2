@@ -40,7 +40,7 @@ public class ClientProxy implements IProxy
     public void init(FMLInitializationEvent event)
     {
         // Load config
-        RFP2.rfp2Config = new RFP2Config();
+        RFP2.config = new RFP2Config();
         
         // Register keybinds
         ClientRegistry.registerKeyBinding(RFP2.keybindArmsToggle.keyBindingInstance);
@@ -56,7 +56,7 @@ public class ClientProxy implements IProxy
     public void postInit(FMLPostInitializationEvent event)
     {
         // Begin tracking state
-        RFP2.rfp2State = new RFP2State();
+        RFP2.state = new RFP2State();
     }
     
     // Called when starting up a dedicated server
