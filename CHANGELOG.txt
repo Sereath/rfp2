@@ -1,0 +1,32 @@
+CHANGELOG
+
+    v1.3.0:
+        - Added compatibility api documentation to the source root
+        - Relaxed mod blacklisting checks and allowed them to be bypassed at the user's discretion
+        - Removed Ido from blacklist
+        - Added support for "Ido" movement mod (https://github.com/Kaydax/Ido)
+        - Added changelog to the source root
+        - Refactored mechanism for fixing conflicts with other mods -- code is now modular and it should be easier to add fixes going forward.
+
+    v1.2.3:
+        - Mod blacklist added due to numerous reports certain mods that I cannot fix compatibility with easily. If known conflicting mods are present, RFP2 will not load, and will display a warning message.
+        - Added the following mods to the blacklist: obfuscate, ido, moreplayermodels, playerformlittlemaid
+        - Added logging rate limiting for when the "ignore rendering errors" option is checked.
+ 
+    v1.2.2:
+        - Morph mod integration (RFP2 will disable itself while you are morphed)
+        - Added an experimental option to bypass rendering safety checks for those who keep having RFP2 switch itself off unnecessarily. (Game may crash with this enabled, you have been warned!)
+        - Added Compatibility API for other mods to interact with RFP2
+        
+    v1.1.0:
+        - Added Cosmetic Armor Reworked integration
+        - Fixed first person rendering bug that caused visual problems with CarryOn and similar mods that affect first person poses
+        
+    v1.0.0:
+        - Added Configurable hotkeys to toggle mod features
+        - Body now follows camera facing direction by default (can be toggled with hotkey)
+        - Mod no longer changes F1 HUD toggle functionality
+        - Near-instant startup of first person effect after logging in, teleporting, or respawning
+        - Improved forge integration, including in-game config GUI
+        - Improved compatibility options, see in-game options menu for full details
+    

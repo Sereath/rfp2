@@ -66,13 +66,3 @@ BUILD INSTRUCTIONS (For Linux -- windows will use gradlew.bat instead of ./gradl
 6. Build
     ./gradlew build
     
-    
-CHANGELOG
-
-    v1.3.0
-        - Added compatibility api instructions to source root
-        - Added support for Ido (https://github.com/Kaydax/Ido)
-        - Relaxed mod compatibility checks and allowed them to be disabled entirely
-        
-
-        
