@@ -1,7 +1,6 @@
 package com.rejahtavi.rfp2;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Keyboard;
@@ -46,7 +45,9 @@ public class RFP2
     // Provide list of mods to load after, so that that compatibility handlers can load correctly.
     public static final String MODDEPS = (("after:" + RFP2CompatHandlerCosarmor.modId + ";")
                                           + ("after:" + RFP2CompatHandlerIdo.modId + ";")
-                                          + ("after:" + RFP2CompatHandlerMorph.modId + ";"));
+                                          + ("after:" + RFP2CompatHandlerMorph.modId + ";")
+                                          + ("after:obfuscate;")
+                                          + ("after:moreplayermodels;"));
     
     // Collection of compatibility handler objects
     public static ArrayList<RFP2CompatHandler> compatHandlers = new ArrayList<RFP2CompatHandler>();

@@ -13,7 +13,7 @@ public class RFP2CompatHandlerBaubles extends RFP2CompatHandler
     
     // Constants
     private static final int BAUBLES_HEAD_INDEX = 4;
-    
+
     // Local objects
     private ItemStack headBauble = ItemStack.EMPTY;
     

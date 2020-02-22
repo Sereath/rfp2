@@ -64,9 +64,9 @@ public class RenderPlayerDummy extends Render<EntityPlayerDummy>
         
         // Grab a backup of any items we might possibly touch, so that we can be guaranteed
         // to be able to restore them when it comes time for the finally{} block to run.
-        ItemStack itemMainHand           = player.inventory.getCurrentItem();
-        ItemStack itemOffHand            = player.inventory.offHandInventory.get(0);
-        ItemStack itemHelmetSlot         = player.inventory.armorInventory.get(3);
+        ItemStack itemMainHand   = player.inventory.getCurrentItem();
+        ItemStack itemOffHand    = player.inventory.offHandInventory.get(0);
+        ItemStack itemHelmetSlot = player.inventory.armorInventory.get(3);
         
         // Make quick per-frame compatibility checks based on current configuration and player state
         
@@ -82,15 +82,23 @@ public class RenderPlayerDummy extends Render<EntityPlayerDummy>
         ModelPlayer playerModel = (ModelPlayer) playerRenderer.getMainModel();
         if (playerModel == null) return;
         
+        RFP2.logger.log(RFP2.LOGGING_LEVEL_HIGH, playerModel.getClass().getCanonicalName());
+        
         // Grab a backup of the various player model layers we might adjust
         // This way we aren't making any assumptions about what other mods might be doing with these options
         // and we can restore everything when we are finished.
         boolean[] modelState = { playerModel.bipedHead.isHidden,
+                                 playerModel.bipedHead.showModel,
                                  playerModel.bipedHeadwear.isHidden,
+                                 playerModel.bipedHeadwear.showModel,
                                  playerModel.bipedLeftArm.isHidden,
-                                 playerModel.bipedRightArm.isHidden,
+                                 playerModel.bipedLeftArm.showModel,
                                  playerModel.bipedLeftArmwear.isHidden,
-                                 playerModel.bipedRightArmwear.isHidden
+                                 playerModel.bipedLeftArmwear.showModel,
+                                 playerModel.bipedRightArm.isHidden,
+                                 playerModel.bipedRightArm.showModel,
+                                 playerModel.bipedRightArmwear.isHidden,
+                                 playerModel.bipedRightArmwear.showModel
         };
         
         /*
@@ -111,11 +119,14 @@ public class RenderPlayerDummy extends Render<EntityPlayerDummy>
             // (Keep this NO-OP check last, it can be more expensive than the others, due to the mount check.)
             // If mod is not enabled this frame, do nothing
             if (!RFP2.state.isModEnabled(player)) return;
-
+            
             // Check if any of the compatibility handlers want us to skip this frame 
             for (RFP2CompatHandler handler : RFP2.compatHandlers)
             {
-                if (handler.getDisableRFP2(player)) { return; }
+                if (handler.getDisableRFP2(player))
+                {
+                    return;
+                }
             }
             
             /*
@@ -143,9 +154,11 @@ public class RenderPlayerDummy extends Render<EntityPlayerDummy>
             player.inventory.armorInventory.set(3, ItemStack.EMPTY);
             
             // Hide the player model's head layers, again so they do not obstruct the camera.
-            playerModel.bipedHead.isHidden     = true;
-            playerModel.bipedHeadwear.isHidden = true;
-
+            playerModel.bipedHead.isHidden      = true;
+            playerModel.bipedHead.showModel     = false;
+            playerModel.bipedHeadwear.isHidden  = true;
+            playerModel.bipedHeadwear.showModel = false;
+            
             // Instruct compatibility handlers hide head models (handlers are responsible for caching state for later restoration) 
             for (RFP2CompatHandler handler : RFP2.compatHandlers)
             {
@@ -162,11 +175,15 @@ public class RenderPlayerDummy extends Render<EntityPlayerDummy>
                 player.inventory.offHandInventory.set(0, ItemStack.EMPTY);
                 
                 // Hide the player model's arm layers
-                playerModel.bipedLeftArm.isHidden      = true;
-                playerModel.bipedRightArm.isHidden     = true;
-                playerModel.bipedLeftArmwear.isHidden  = true;
-                playerModel.bipedRightArmwear.isHidden = true;
-
+                playerModel.bipedLeftArm.isHidden       = true;
+                playerModel.bipedLeftArm.showModel      = false;
+                playerModel.bipedRightArm.isHidden      = true;
+                playerModel.bipedRightArm.showModel     = false;
+                playerModel.bipedLeftArmwear.isHidden   = true;
+                playerModel.bipedLeftArmwear.showModel  = false;
+                playerModel.bipedRightArmwear.isHidden  = true;
+                playerModel.bipedRightArmwear.showModel = false;
+                
                 // Instruct compatibility handlers hide arm models (handlers are responsible for caching state for later restoration) 
                 for (RFP2CompatHandler handler : RFP2.compatHandlers)
                 {
@@ -253,13 +270,19 @@ public class RenderPlayerDummy extends Render<EntityPlayerDummy>
             player.inventory.offHandInventory.set(0, itemOffHand);
             
             // restore the player model's rendering layers
-            playerModel.bipedHead.isHidden         = modelState[0];
-            playerModel.bipedHeadwear.isHidden     = modelState[1];
-            playerModel.bipedLeftArm.isHidden      = modelState[2];
-            playerModel.bipedRightArm.isHidden     = modelState[3];
-            playerModel.bipedLeftArmwear.isHidden  = modelState[4];
-            playerModel.bipedRightArmwear.isHidden = modelState[5];
-
+            playerModel.bipedHead.isHidden          = modelState[0];
+            playerModel.bipedHead.showModel         = modelState[1];
+            playerModel.bipedHeadwear.isHidden      = modelState[2];
+            playerModel.bipedHeadwear.showModel     = modelState[3];
+            playerModel.bipedLeftArm.isHidden       = modelState[4];
+            playerModel.bipedLeftArm.showModel      = modelState[5];
+            playerModel.bipedLeftArmwear.isHidden   = modelState[6];
+            playerModel.bipedLeftArmwear.showModel  = modelState[7];
+            playerModel.bipedRightArm.isHidden      = modelState[8];
+            playerModel.bipedRightArm.showModel     = modelState[9];
+            playerModel.bipedRightArmwear.isHidden  = modelState[10];
+            playerModel.bipedRightArmwear.showModel = modelState[11];
+            
             // Instruct compatibility handlers restore head models 
             for (RFP2CompatHandler handler : RFP2.compatHandlers)
             {
