@@ -1,28 +1,19 @@
 #!/bin/bash
 JAR=RealFirstPerson2*.jar
-DST1=~/.multimc/instances/ForgeDev/.minecraft/mods
-DST2=~/.multimc/instances/ForgeDev2/.minecraft/mods
-DST3=~/.multimc/instances/KilljoysMC_v2.0/.minecraft/mods
+DST=~/.minecraft/instances/Forge\ 1.12.2/mods
 
 echo ""
 echo "deleting old jar..."
 rm ./build/libs/*
-rm $DST1/$JAR
-rm $DST2/$JAR
-rm $DST3/$JAR
+rm $DST/$JAR
 
 echo ""
 echo "building..."
 ./gradlew build
 
 echo ""
-echo "copying replacement jar into test instances..."
-echo "to: "$DST1/
-cp ./build/libs/* $DST1/
-echo "to: "$DST2/
-cp ./build/libs/* $DST2/
-echo "to: "$DST3/
-cp ./build/libs/* $DST3/
+echo "copying replacement jar into "$DST/
+cp ./build/libs/* $DST/
 echo ""
 echo "creating release zip..."
 cd ./build/libs/
